@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard · Adicción Digital Estudiantil</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo-section">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-brain-circuit"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Dashboard · Adicción Digital Estudiantil</h1>
+                    <p>Modelo Predictivo ML · 705 estudiantes universitarios (18–24 años)</p>
+                </div>
+            </div>
+            <div class="header-status-section">
+                <span class="status-badge active">
+                    <span class="pulse-dot"></span>
+                    <i class="fa-solid fa-server"></i> Modelo Activo
+                </span>
+            </div>
+        </header>
+
+        <!-- KPI Cards Grid -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon color-purple">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Total Estudiantes</span>
+                    <h3 class="kpi-val">{{ total_estudiantes }}</h3>
+                    <span class="kpi-subtext">Muestra total analizada</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon color-red">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Alto Riesgo (>=7)</span>
+                    <h3 class="kpi-val">{{ pct_alto_riesgo }}%</h3>
+                    <span class="kpi-subtext">Alumnos con adicción alta</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon color-teal">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Horas Promedio</span>
+                    <h3 class="kpi-val">{{ media_horas_uso }}h</h3>
+                    <span class="kpi-subtext">Uso diario en redes</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon color-yellow">
+                    <i class="fa-solid fa-shield-heart"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Salud Mental Promedio</span>
+                    <h3 class="kpi-val">{{ media_salud_mental }}/10</h3>
+                    <span class="kpi-subtext">Bienestar emocional autopercibido</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gráficas y Distribuciones -->
+        <section class="charts-section">
+            <div class="chart-container-card">
+                <div class="chart-header">
+                    <h4><i class="fa-solid fa-chart-simple"></i> Distribución de Puntajes de Adicción (Score: 2-9)</h4>
+                </div>
+                <div class="chart-body">
+                    <canvas id="scoreDistributionChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container-card">
+                <div class="chart-header">
+                    <h4><i class="fa-solid fa-chart-bar"></i> % Alto Riesgo por Plataforma de Redes</h4>
+                </div>
+                <div class="chart-body">
+                    <canvas id="platformRiskChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Predictor Form & Results Section -->
+        <section class="predictor-section">
+            
+            <!-- Predictor Form -->
+            <div class="form-container-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-magnifying-glass"></i> Predice el Riesgo de un Estudiante</h3>
+                    <p>Ingresa los parámetros conductuales y demográficos para calcular la probabilidad y el nivel de adicción con algoritmos de Inteligencia Artificial.</p>
+                </div>
+                <form id="prediction-form" class="prediction-form">
+                    
+                    <div class="form-grid">
+                        
+                        <!-- Sliders -->
+                        <div class="form-group slider-group">
+                            <div class="group-label">
+                                <label for="horas_uso"><i class="fa-regular fa-clock"></i> Horas de uso diario</label>
+                                <span class="badge-value" id="val-horas_uso">5.0h</span>
+                            </div>
+                            <input type="range" id="horas_uso" name="horas_uso" min="0" max="12" step="0.1" value="5.0" oninput="actualizarSliderVal(this, 'h')">
+                            <div class="slider-labels">
+                                <span>0h</span>
+                                <span>6h</span>
+                                <span>12h</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group slider-group">
+                            <div class="group-label">
+                                <label for="salud_mental"><i class="fa-solid fa-heart-pulse"></i> Salud Mental</label>
+                                <span class="badge-value" id="val-salud_mental">6/10</span>
+                            </div>
+                            <input type="range" id="salud_mental" name="salud_mental" min="1" max="10" step="1" value="6" oninput="actualizarSliderVal(this, '/10')">
+                            <div class="slider-labels">
+                                <span>1 (Baja)</span>
+                                <span>5</span>
+                                <span>10 (Alta)</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group slider-group">
+                            <div class="group-label">
+                                <label for="sueno"><i class="fa-solid fa-bed"></i> Horas de sueño</label>
+                                <span class="badge-value" id="val-sueno">7.0h</span>
+                            </div>
+                            <input type="range" id="sueno" name="sueno" min="4" max="12" step="0.5" value="7.0" oninput="actualizarSliderVal(this, 'h')">
+                            <div class="slider-labels">
+                                <span>4h</span>
+                                <span>8h</span>
+                                <span>12h</span>
+                            </div>
+                        </div>
+
+                        <!-- Selects -->
+                        <div class="form-group">
+                            <label for="conflictos"><i class="fa-solid fa-comments-slash"></i> Conflictos por redes</label>
+                            <select id="conflictos" name="conflictos">
+                                <option value="0">0 (Ninguno)</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                                <option value="5">5 (Frecuentes)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="genero"><i class="fa-solid fa-venus-mars"></i> Género</label>
+                            <select id="genero" name="genero">
+                                <option value="Female">Femenino</option>
+                                <option value="Male">Masculino</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nivel_academico"><i class="fa-solid fa-graduation-cap"></i> Nivel académico</label>
+                            <select id="nivel_academico" name="nivel_academico">
+                                <option value="High School">Bachillerato</option>
+                                <option value="Undergraduate" selected>Pregrado</option>
+                                <option value="Graduate">Posgrado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="plataforma"><i class="fa-solid fa-share-nodes"></i> Plataforma principal</label>
+                            <select id="plataforma" name="plataforma">
+                                <option value="Instagram" selected>Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="YouTube">YouTube</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Twitter">Twitter / X</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Snapchat">Snapchat</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="WeChat">WeChat</option>
+                                <option value="LINE">LINE</option>
+                                <option value="VKontakte">VKontakte</option>
+                                <option value="KakaoTalk">KakaoTalk</option>
+                            </select>
+                        </div>
+
+                        <!-- Toggle Checkbox (Rendimiento) -->
+                        <div class="form-group toggle-group">
+                            <label class="toggle-label"><i class="fa-solid fa-book-bookmark"></i> ¿Afecta rendimiento académico?</label>
+                            <label class="switch">
+                                <input type="checkbox" id="afecta_rendimiento" name="afecta_rendimiento" value="Yes">
+                                <span class="slider-toggle rounded"></span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn-predict" id="btn-predict-submit">
+                        <span id="btn-text"><i class="fa-solid fa-wand-magic-sparkles"></i> Predecir Nivel de Adicción</span>
+                        <div class="spinner" id="btn-spinner" style="display: none;"></div>
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- Prediction Results Display -->
+            <div class="results-container-card" id="results-panel" style="display: none;">
+                
+                <div class="card-header border-bottom">
+                    <h3><i class="fa-solid fa-square-poll-vertical"></i> Diagnóstico de Riesgo ML</h3>
+                </div>
+
+                <div class="results-layout">
+                    
+                    <!-- Lado izquierdo: Puntuación, Gauge y badges -->
+                    <div class="results-left">
+                        <div class="gauge-section">
+                            <div class="circular-progress" id="score-gauge">
+                                <div class="value-container">
+                                    <span class="score-num" id="res-puntaje-predicho">0.0</span>
+                                    <span class="score-label">Puntaje (2-9)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="badge-results-section">
+                            <div class="result-badge" id="res-badge-riesgo">
+                                BAJO RIESGO
+                            </div>
+                            <div class="tree-badge">
+                                <i class="fa-solid fa-tree"></i> Árbol: <span id="res-nivel-arbol">Media</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de probabilidad -->
+                        <div class="prob-section">
+                            <div class="prob-header">
+                                <span>Probabilidad de Alto Riesgo</span>
+                                <span id="res-prob-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="res-prob-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lado derecho: Factores y recomendaciones -->
+                    <div class="results-right">
+                        
+                        <!-- Factores de riesgo -->
+                        <div class="factors-section">
+                            <h4><i class="fa-solid fa-triangle-exclamation color-red"></i> Factores de Riesgo Detectados</h4>
+                            <ul class="factors-list" id="res-factores-lista">
+                                <!-- JS inserta items -->
+                            </ul>
+                        </div>
+
+                        <!-- Recomendaciones -->
+                        <div class="recs-section">
+                            <h4><i class="fa-solid fa-hand-holding-heart color-teal"></i> Recomendaciones Clínicas y Conductuales</h4>
+                            <div class="recs-grid" id="res-recs-grid">
+                                <!-- JS inserta cards -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-notebooks">
+                <span class="footer-title">Cuadernos de Google Colab:</span>
+                <div class="notebook-badges">
+                    <a href="adiccion_etl.ipynb" class="notebook-badge" target="_blank"><i class="fa-solid fa-database"></i> 01_ETL</a>
+                    <a href="adiccion_eda.ipynb" class="notebook-badge" target="_blank"><i class="fa-solid fa-chart-line"></i> 02_EDA</a>
+                    <a href="adiccion_regresion_lineal.ipynb" class="notebook-badge" target="_blank"><i class="fa-solid fa-square-root-variable"></i> 03_Lineal</a>
+                    <a href="adiccion_regresion_logistica.ipynb" class="notebook-badge" target="_blank"><i class="fa-solid fa-chart-pie"></i> 04_Logística</a>
+                    <a href="adiccion_arboles_decision.ipynb" class="notebook-badge" target="_blank"><i class="fa-solid fa-network-wired"></i> 05_Árboles</a>
+                </div>
+            </div>
+            <div class="footer-credits">
+                <p>Proyecto ML · Adicción Digital Estudiantil &copy; 2026. Basado en dataset <i>Students_Social_Media_Addiction.csv</i>.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script>
+        // Actualizar visualización en tiempo real de los sliders
+        function actualizarSliderVal(slider, suffix) {
+            const badgeId = "val-" + slider.id;
+            const badge = document.getElementById(badgeId);
+            badge.innerText = slider.value + suffix;
+        }
+
+        // Al cargar la página, inicializar gráficos
+        let scoreChart = null;
+        let platformChart = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Cargar estadísticas iniciales para Charts
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        generarGraficoScores(res.distribucion_puntajes);
+                        generarGraficoPlataformas(res.riesgo_por_plataforma);
+                    }
+                })
+                .catch(err => console.error("Error al cargar estadísticas iniciales:", err));
+
+            // Manejo de envío de formulario de predicción
+            const form = document.getElementById("prediction-form");
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                // Mostrar Spinner y deshabilitar botón
+                const btnSubmit = document.getElementById("btn-predict-submit");
+                const btnText = document.getElementById("btn-text");
+                const btnSpinner = document.getElementById("btn-spinner");
+
+                btnSubmit.disabled = true;
+                btnText.style.display = "none";
+                btnSpinner.style.display = "block";
+
+                // Recopilar datos
+                const payload = {
+                    horas_uso: parseFloat(document.getElementById("horas_uso").value),
+                    salud_mental: parseInt(document.getElementById("salud_mental").value),
+                    sueno: parseFloat(document.getElementById("sueno").value),
+                    conflictos: parseInt(document.getElementById("conflictos").value),
+                    genero: document.getElementById("genero").value,
+                    nivel_academico: document.getElementById("nivel_academico").value,
+                    plataforma: document.getElementById("plataforma").value,
+                    afecta_rendimiento: document.getElementById("afecta_rendimiento").checked ? "Yes" : "No"
+                };
+
+                // Petición POST predictiva
+                fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(res => {
+                    // Restaurar botón
+                    btnSubmit.disabled = false;
+                    btnText.style.display = "block";
+                    btnSpinner.style.display = "none";
+
+                    if (res.status === 'success') {
+                        actualizarResultadosUI(res);
+                    } else {
+                        alert("Error en la predicción: " + res.message);
+                    }
+                })
+                .catch(err => {
+                    btnSubmit.disabled = false;
+                    btnText.style.display = "block";
+                    btnSpinner.style.display = "none";
+                    console.error("Error en la llamada api/predict:", err);
+                    alert("Ocurrió un error al contactar al servidor.");
+                });
+            });
+        });
+
+        // Crear gráfico de barras de distribución de puntajes
+        function generarGraficoScores(distribucion) {
+            const ctx = document.getElementById('scoreDistributionChart').getContext('2d');
+            const labels = Object.keys(distribucion);
+            const data = Object.values(distribucion);
+
+            // Generar colores condicionales por rangos: verde (<5), naranja (5-6), rojo (>=7)
+            const colors = labels.map(score => {
+                const s = parseFloat(score);
+                if (s < 5) return '#00D4AA'; // teal
+                if (s < 7) return '#FFD166'; // yellow
+                return '#FF6B6B'; // red
+            });
+
+            scoreChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Estudiantes',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1a1d27',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#3e4252',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#8892A4', font: { family: 'Inter' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8892A4', font: { family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Crear gráfico horizontal de plataformas de mayor riesgo
+        function generarGraficoPlataformas(riesgoPlat) {
+            const ctx = document.getElementById('platformRiskChart').getContext('2d');
+            
+            // Tomar top 7 plataformas con más riesgo
+            const sortedEntries = Object.entries(riesgoPlat).slice(0, 7);
+            const labels = sortedEntries.map(e => e[0]);
+            const data = sortedEntries.map(e => e[1]);
+
+            platformChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '% Alto Riesgo',
+                        data: data,
+                        backgroundColor: 'rgba(108, 99, 255, 0.85)',
+                        borderColor: '#6C63FF',
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1a1d27',
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.parsed.x}% en Alto Riesgo`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#8892A4', 
+                                font: { family: 'Inter' },
+                                callback: function(value) { return value + '%'; }
+                            },
+                            max: 100
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#8892A4', font: { family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar UI con resultados devueltos por /api/predict
+        function actualizarResultadosUI(res) {
+            const resultsPanel = document.getElementById("results-panel");
+            resultsPanel.style.display = "block";
+            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+
+            // 1. Mostrar puntaje numérico predicho
+            const scoreValEl = document.getElementById("res-puntaje-predicho");
+            scoreValEl.innerText = res.puntaje_predicho;
+
+            // 2. Animar medidor circular (Gauge)
+            // Escala de 2 a 9 -> Mapear a rango de 0 a 100%
+            const scorePct = (res.puntaje_predicho - 2) / (9 - 2) * 100;
+            const gaugeEl = document.getElementById("score-gauge");
+            
+            // Asignar color de acento según la clasificación de riesgo
+            let colorAccent = '#00D4AA'; // verde
+            if (res.puntaje_predicho >= 5.0 && res.puntaje_predicho < 7.0) {
+                colorAccent = '#FFD166'; // amarillo/naranja
+            } else if (res.puntaje_predicho >= 7.0) {
+                colorAccent = '#FF6B6B'; // rojo
+            }
+            
+            // Cambiar dinámicamente el gradient conic del círculo y el color de texto del score
+            gaugeEl.style.background = `conic-gradient(${colorAccent} ${scorePct * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
+            scoreValEl.style.color = colorAccent;
+
+            // 3. Actualizar badges
+            const badgeEl = document.getElementById("res-badge-riesgo");
+            badgeEl.innerText = res.clasificacion_riesgo + " RIESGO";
+            badgeEl.className = "result-badge"; // Reset clases
+            if (res.clasificacion_riesgo === 'ALTO') {
+                badgeEl.classList.add("color-high");
+            } else {
+                badgeEl.classList.add("color-low");
+            }
+
+            document.getElementById("res-nivel-arbol").innerText = res.nivel_adiccion;
+
+            // 4. Animar barra de progreso de probabilidad
+            const probPct = Math.round(res.probabilidad_riesgo * 100);
+            document.getElementById("res-prob-pct").innerText = probPct + "%";
+            
+            const probFill = document.getElementById("res-prob-fill");
+            probFill.style.width = probPct + "%";
+            probFill.style.backgroundColor = colorAccent;
+
+            // 5. Rellenar lista de factores de riesgo
+            const factorsList = document.getElementById("res-factores-lista");
+            factorsList.innerHTML = "";
+            res.factores_riesgo.forEach(f => {
+                const li = document.createElement("li");
+                li.innerHTML = `<i class="fa-solid fa-circle-chevron-right color-red"></i> <span>${f}</span>`;
+                factorsList.appendChild(li);
+            });
+
+            // 6. Rellenar tarjetas de recomendaciones
+            const recsGrid = document.getElementById("res-recs-grid");
+            recsGrid.innerHTML = "";
+            const icons = [
+                "fa-solid fa-ban-smoking",
+                "fa-solid fa-user-doctor",
+                "fa-solid fa-users-gear"
+            ];
+            
+            res.recomendaciones.forEach((rec, idx) => {
+                const recCard = document.createElement("div");
+                recCard.className = "rec-card";
+                
+                // Extraer título (antes de los dos puntos) y descripción (después)
+                let parts = rec.split(":");
+                let title = parts[0] || "Recomendación";
+                let desc = parts[1] || "";
+                
+                recCard.innerHTML = `
+                    <div class="rec-card-icon">
+                        <i class="${icons[idx] || 'fa-solid fa-circle-check'}"></i>
+                    </div>
+                    <div class="rec-card-body">
+                        <h5>${title}</h5>
+                        <p>${desc}</p>
+                    </div>
+                `;
+                recsGrid.appendChild(recCard);
+            });
+        }
+    </script>
+</body>
+</html>
