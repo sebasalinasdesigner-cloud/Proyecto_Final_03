@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression, LogisticRegression
@@ -8,7 +7,6 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 import os
 
 app = Flask(__name__, template_folder='.', static_folder='.', static_url_path='')
-CORS(app)
 
 def cargar_dataset():
     # Intentar cargar el archivo con espacio o con guion bajo
@@ -289,8 +287,5 @@ def stats():
         }), 400
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') == 'development'
-    print(f"🚀 Iniciando servidor Flask en puerto {port}")
-    app.run(debug=debug, port=port, host='0.0.0.0')
+    print("🚀 Iniciando servidor Flask en http://127.0.0.1:5000")
+    app.run(debug=True, port=5000)

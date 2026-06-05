@@ -87,7 +87,7 @@
                 </div>
                 <div class="kpi-content">
                     <span class="kpi-label">Total Estudiantes</span>
-                    <h3 class="kpi-val" id="kpi-total-estudiantes">-</h3>
+                    <h3 class="kpi-val">{{ total_estudiantes }}</h3>
                     <span class="kpi-subtext">Muestra total analizada</span>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                 </div>
                 <div class="kpi-content">
                     <span class="kpi-label">Alto Riesgo (>=7)</span>
-                    <h3 class="kpi-val" id="kpi-pct-alto-riesgo">-%</h3>
+                    <h3 class="kpi-val">{{ pct_alto_riesgo }}%</h3>
                     <span class="kpi-subtext">Alumnos con adicción alta</span>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                 </div>
                 <div class="kpi-content">
                     <span class="kpi-label">Horas Promedio</span>
-                    <h3 class="kpi-val" id="kpi-media-horas">-h</h3>
+                    <h3 class="kpi-val">{{ media_horas_uso }}h</h3>
                     <span class="kpi-subtext">Uso diario en redes</span>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="kpi-content">
                     <span class="kpi-label">Salud Mental Promedio</span>
-                    <h3 class="kpi-val" id="kpi-salud-mental">-/10</h3>
+                    <h3 class="kpi-val">{{ media_salud_mental }}/10</h3>
                     <span class="kpi-subtext">Bienestar emocional autopercibido</span>
                 </div>
             </div>
@@ -412,18 +412,11 @@
                 observer.observe(card);
             });
 
-            // Cargar estadísticas iniciales para Charts y KPIs
-            fetch('https://adiccion-digital.onrender.com/api/stats')
+            // Cargar estadísticas iniciales para Charts
+            fetch('/api/stats')
                 .then(response => response.json())
                 .then(res => {
                     if (res.status === 'success') {
-                        // Actualizar KPIs
-                        document.getElementById('kpi-total-estudiantes').textContent = res.total_estudiantes;
-                        document.getElementById('kpi-pct-alto-riesgo').textContent = res.pct_alto_riesgo + '%';
-                        document.getElementById('kpi-media-horas').textContent = res.media_horas_uso + 'h';
-                        document.getElementById('kpi-salud-mental').textContent = res.media_salud_mental + '/10';
-                        
-                        // Generar gráficos
                         generarGraficoScores(res.distribucion_puntajes);
                         generarGraficoPlataformas(res.riesgo_por_plataforma);
                     }
@@ -457,7 +450,7 @@
                 };
 
                 // Petición POST predictiva
-                fetch('https://adiccion-digital.onrender.com/api/predict', {
+                fetch('/api/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
