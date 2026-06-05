@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression, LogisticRegression
@@ -7,6 +8,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 import os
 
 app = Flask(__name__, template_folder='.', static_folder='.', static_url_path='')
+CORS(app)
 
 def cargar_dataset():
     # Intentar cargar el archivo con espacio o con guion bajo
