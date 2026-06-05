@@ -413,7 +413,7 @@
             });
 
             // Cargar estadísticas iniciales para Charts
-            fetch('/api/stats')
+            fetch('https://adiccion-digital.onrender.com/api/stats')
                 .then(response => response.json())
                 .then(res => {
                     if (res.status === 'success') {
@@ -450,7 +450,7 @@
                 };
 
                 // Petición POST predictiva
-                fetch('/api/predict', {
+                fetch('https://adiccion-digital.onrender.com/api/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
